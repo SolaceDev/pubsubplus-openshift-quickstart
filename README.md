@@ -21,9 +21,9 @@ The event broker can be deployed in either a three-node High-Availability (HA) g
 In this quick start we go through the steps to set up an event broker using [Solace PubSub+ Helm charts](https://artifacthub.io/packages/search?page=1&repo=solace).
 
 There are three Helm chart variants available with default small-size configurations:
-1.	`pubsubplus-dev`—deploys a minimum footprint software event broker for developers (standalone)
-2.	`pubsubplus`—deploys a standalone software event broker that supports 100 connections
-3.	`pubsubplus-ha`—deploys three software event brokers in an HA group that supports 100 connections
+- `pubsubplus-dev`—deploys a minimum footprint software event broker for developers (standalone)
+- `pubsubplus`—deploys a standalone software event broker that supports 100 connections
+- `pubsubplus-ha`—deploys three software event brokers in an HA group that supports 100 connections
 
 For other event broker configurations or sizes, refer to the [PubSub+ Software Event Broker Helm Chart](/pubsubplus/README.md) documentation.
 
@@ -37,6 +37,7 @@ There are [multiple ways](https://www.openshift.com/try ) to get to an OpenShift
 Assuming you have access to an OpenShift 4 platform, log in as `kubeadmin` using the `oc login -u kubeadmin` command.
 
 Ensure your OpenShift environment is ready:
+
 ```bash
 # This command returns the current user
 oc whoami
@@ -46,7 +47,7 @@ oc whoami
 
 Follow the [instructions from Helm](//github.com/helm/helm#install), or if you're using Linux, simply run:
 ```bash
-  curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
 ```
 
 Helm is configured properly if the `helm version` command returns no error.
@@ -55,43 +56,52 @@ Helm is configured properly if the `helm version` command returns no error.
 ### Step 3: Install the Software Event Broker with the Default Configuration
 
 1. Add the Solace Helm charts to your local Helm repo:
-```bash
-  helm repo add solacecharts https://solaceproducts.github.io/pubsubplus-kubernetes-quickstart/helm-charts
-```
+    ```bash
+    elm repo add solacecharts https://solaceproducts.github.io/pubsubplus-kubernetes-quickstart/helm-charts
+    ```
 
 2. Create a new project or switch to your existing project (do not use the `default` project as its loose permissions don't reflect a typical OpenShift environment)
-```bash
-  oc new-project solace-pubsub
-```
+    ```bash
+    oc new-project solace-pubsub
+    ```
 
-- By default the latest public [Docker image of PubSub+ Standard Edition](https://hub.Docker.com/r/solace/solace-pubsub-standard/tags/) available from the DockerHub registry is used. To use a different image, add the `image.repository=<your-image-location>,image.tag=<your-image-tag>` values to the `--set` commands below (comma-separated). You can also optionally add `image.pullSecretName=<your-image-repo-pull-secret>` if required by the image repository.
+    By default the latest public [Docker image](https://hub.Docker.com/r/solace/solace-pubsub-standard/tags/) of PubSub+ Standard Edition available from the DockerHub registry is used. To use a different image, add the following values (comma-separated) to the `--set` commands in Step 3 below:
+
+    ```bash
+    image.repository=<your-image-location>,image.tag=<your-image-tag>
+    ```
+
+    If it is required by the image repository, you can also add optionally add the following:
+    ```bash
+    image.pullSecretName=<your-image-repo-pull-secret>
+    ```
 
 3. Use one of the following Helm chart variants to create a deployment (for configuration options and deletion instructions, refer to the [PubSub+ Software Event Broker Helm Chart documentation](https://github.com/SolaceProducts/pubsubplus-kubernetes-quickstart/tree/master/pubsubplus#configuration)):
 
-- Create a Solace PubSub+ minimum deployment for development purposes using `pubsubplus-dev`. This variant requires a minimum of 1 CPU and 3.4 GiB of memory to be available to the PubSub+ event broker pod.
-```bash
-  # Deploy PubSub+ Standard edition, minimum footprint developer version
-  helm install my-release solacecharts/pubsubplus-dev \
-    --set securityContext.enabled=false
-```
+    - Create a Solace PubSub+ minimum deployment for development purposes using `pubsubplus-dev`. This variant requires a minimum of 1 CPU and 3.4 GiB of memory to be available to the PubSub+ event broker pod.
+    ```bash
+    # Deploy PubSub+ Standard edition, minimum footprint developer version
+    helm install my-release solacecharts/pubsubplus-dev \
+      --set securityContext.enabled=false
+    ```
 
-- Create a Solace PubSub+ standalone deployment, supporting 100 connections scaling using `pubsubplus`. A minimum of 2 CPUs and 3.4 GiB of memory must be available to the PubSub+ pod.
-```bash
-  # Deploy PubSub+ Standard edition, standalone
-  helm install my-release solacecharts/pubsubplus \
-    --set securityContext.enabled=false
-```
+    - Create a Solace PubSub+ standalone deployment that supports 100 connections using `pubsubplus`. A minimum of 2 CPUs and 3.4 GiB of memory must be available to the PubSub+ pod.
+    ```bash
+    # Deploy PubSub+ Standard edition, standalone
+    helm install my-release solacecharts/pubsubplus \
+      --set securityContext.enabled=false
+    ```
 
-- Create a Solace PubSub+ HA deployment, supporting 100 connections scaling using `pubsubplus-ha`. This deployment requires that at least 2 CPUs and 3.4 GiB of memory are available to *each* of the three event broker pods.
-```bash
-  # Deploy PubSub+ Standard edition, HA
-  helm install my-release solacecharts/pubsubplus-ha \
-    --set securityContext.enabled=false
-```
+    - Create a Solace PubSub+ HA deployment that supports 100 connections using `pubsubplus-ha`. This deployment requires that at least 2 CPUs and 3.4 GiB of memory are available to *each* of the three event broker pods.
+    ```bash
+    # Deploy PubSub+ Standard edition, HA
+    helm install my-release solacecharts/pubsubplus-ha \
+      --set securityContext.enabled=false
+    ```
 
-All of the Helm options above start the deployment and write related information and notes to the console.
+    All of the Helm options above start the deployment and write related information and notes to the console.
 
-Broker services are exposed by default through a Load Balancer that is specific to your OpenShift platform. For details, see the `Services access` section of the notes written to the console.
+    Broker services are exposed by default through a Load Balancer that is specific to your OpenShift platform. For details, see the `Services access` section of the notes written to the console.
 
 4. Wait for the deployment to complete, following any instructions that are written to the console. You can now [validate the deployment and try the management and messaging services](/docs/PubSubPlusOpenShiftDeployment.md#validating-the-deployment).
  
