@@ -64,15 +64,17 @@ Helm is configured properly if the `helm version` command returns no error.
   oc new-project solace-pubsub
 ```
 
-	- By default the latest public [Docker image of PubSub+ Standard Edition](https://hub.Docker.com/r/solace/solace-pubsub-standard/tags/) available from the DockerHub registry is used. To use a different image, add the `image.repository=<your-image-location>,image.tag=<your-image-tag>` values to the `--set` commands below (comma-separated). You can also optionally add `image.pullSecretName=<your-image-repo-pull-secret>` if required by the image repository.
+- By default the latest public [Docker image of PubSub+ Standard Edition](https://hub.Docker.com/r/solace/solace-pubsub-standard/tags/) available from the DockerHub registry is used. To use a different image, add the `image.repository=<your-image-location>,image.tag=<your-image-tag>` values to the `--set` commands below (comma-separated). You can also optionally add `image.pullSecretName=<your-image-repo-pull-secret>` if required by the image repository.
 
-3. Use one of the chart variants to create a deployment. For configuration options and delete instructions, refer to the [PubSub+ Software Event Broker Helm Chart documentation](https://github.com/SolaceProducts/pubsubplus-kubernetes-quickstart/tree/master/pubsubplus#configuration).
-- Create a Solace PubSub+ minimum deployment for development purposes using `pubsubplus-dev`. It requires a minimum of 1 CPU and 3.4 GiB of memory to be available to the PubSub+ event broker pod.
+3. Use one of the following Helm chart variants to create a deployment (for configuration options and deletion instructions, refer to the [PubSub+ Software Event Broker Helm Chart documentation](https://github.com/SolaceProducts/pubsubplus-kubernetes-quickstart/tree/master/pubsubplus#configuration)):
+
+- Create a Solace PubSub+ minimum deployment for development purposes using `pubsubplus-dev`. This variant requires a minimum of 1 CPU and 3.4 GiB of memory to be available to the PubSub+ event broker pod.
 ```bash
   # Deploy PubSub+ Standard edition, minimum footprint developer version
   helm install my-release solacecharts/pubsubplus-dev \
     --set securityContext.enabled=false
 ```
+
 - Create a Solace PubSub+ standalone deployment, supporting 100 connections scaling using `pubsubplus`. A minimum of 2 CPUs and 3.4 GiB of memory must be available to the PubSub+ pod.
 ```bash
   # Deploy PubSub+ Standard edition, standalone
@@ -80,16 +82,16 @@ Helm is configured properly if the `helm version` command returns no error.
     --set securityContext.enabled=false
 ```
 
-- Create a Solace PubSub+ HA deployment, supporting 100 connections scaling using `pubsubplus-ha`. The minimum resource requirements are 2 CPU and 3.4 GiB of memory available to each of the three event broker pods.
+- Create a Solace PubSub+ HA deployment, supporting 100 connections scaling using `pubsubplus-ha`. This deployment requires that at least 2 CPUs and 3.4 GiB of memory are available to *each* of the three event broker pods.
 ```bash
   # Deploy PubSub+ Standard edition, HA
   helm install my-release solacecharts/pubsubplus-ha \
     --set securityContext.enabled=false
 ```
 
-	The options listed above start the deployment and write related information and notes to the console.
+All of the Helm options above start the deployment and write related information and notes to the console.
 
-	Broker services are exposed by default through a Load Balancer that is specific to your OpenShift platform. For details, see the `Services access` section of the notes.
+Broker services are exposed by default through a Load Balancer that is specific to your OpenShift platform. For details, see the `Services access` section of the notes written to the console.
 
 4. Wait for the deployment to complete, following any instructions that are written to the console. You can now [validate the deployment and try the management and messaging services](/docs/PubSubPlusOpenShiftDeployment.md#validating-the-deployment).
  
@@ -116,6 +118,6 @@ This project is licensed under the Apache License, Version 2.0. - See the [LICEN
 
 For more information about Solace technology in general please visit these resources:
 
-- The Solace Developer Portal website at: [solace.dev](//solace.dev/)
+- The Solace Developer Portal website at [solace.dev](//solace.dev/)
 - Understanding [Solace technology](//solace.com/products/platform/)
-- Ask the [Solace community](//dev.solace.com/community/).
+- Ask the [Solace community](//dev.solace.com/community/)

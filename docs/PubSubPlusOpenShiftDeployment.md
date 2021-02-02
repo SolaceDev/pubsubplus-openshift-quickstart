@@ -1,6 +1,6 @@
-# Deploying a Solace PubSub+ Software Event Broker onto an OpenShift 4 platform
+# Deploying a Solace PubSub+ Software Event Broker onto an OpenShift 4 Platform
 
-This is detailed documentation of deploying Solace PubSub+ Software Event Broker onto an OpenShift 4 platform including steps to set up a Red Hat OpenShift Container Platform platform on AWS.
+This documentation provides detailed instructions for deploying a Solace PubSub+ Software Event Broker onto an OpenShift 4 platform, including steps to set up a Red Hat OpenShift Container Platform platform on AWS.
 * For a hands-on quick start using an existing OpenShift platform, refer to the [Quick Start guide](/README.md).
 * For considerations about deploying in a general Kubernetes environment, refer to the [Solace PubSub+ on Kubernetes Documentation](https://github.com/SolaceProducts/pubsubplus-kubernetes-quickstart/blob/master/docs/PubSubPlusK8SDeployment.md)
 * For the `pubsubplus` Helm chart configuration options, refer to the [PubSub+ Software Event Broker Helm Chart Reference](/pubsubplus/README.md).
