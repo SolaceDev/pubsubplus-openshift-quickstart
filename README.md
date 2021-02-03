@@ -25,7 +25,7 @@ There are three Helm chart variants available with default small-size configurat
 - `pubsubplus`—deploys a standalone software event broker that supports 100 connections
 - `pubsubplus-ha`—deploys three software event brokers in an HA group that supports 100 connections
 
-For other event broker configurations or sizes, refer to the [PubSub+ Software Event Broker Helm Chart](/pubsubplus/README.md) documentation.
+For other event broker configurations or sizes, refer to the [PubSub+ Software Event Broker Helm Chart](https://github.com/SolaceProducts/pubsubplus-kubernetes-quickstart/blob/master/pubsubplus/README.md) documentation.
 
 ### Step 1: Get an OpenShift Environment
 
