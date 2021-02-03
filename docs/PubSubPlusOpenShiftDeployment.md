@@ -1,103 +1,117 @@
 # Deploying a Solace PubSub+ Software Event Broker onto an OpenShift 4 Platform
 
-This documentation provides detailed instructions for deploying a Solace PubSub+ Software Event Broker onto an OpenShift 4 platform, including steps to set up a Red Hat OpenShift Container Platform platform on AWS.
-* For a hands-on quick start using an existing OpenShift platform, refer to the [Quick Start guide](/README.md).
-* For considerations about deploying in a general Kubernetes environment, refer to the [Solace PubSub+ on Kubernetes Documentation](https://github.com/SolaceProducts/pubsubplus-kubernetes-quickstart/blob/master/docs/PubSubPlusK8SDeployment.md)
-* For the `pubsubplus` Helm chart configuration options, refer to the [PubSub+ Software Event Broker Helm Chart Reference](/pubsubplus/README.md).
-* For OpenShift 3.11, refer to the [archived version of this project](https://github.com/SolaceProducts/pubsubplus-openshift-quickstart/tree/v1.1.1).
+Solace PubSub+ Software Event Broker meets the needs of big data, cloud migration, and Internet-of-Things initiatives, and enables microservices and event-driven architecture. Capabilities include topic-based publish/subscribe, request/reply, message queues/queueing, and data streaming for IoT devices and mobile/web apps. The event broker supports open APIs and standard protocols including AMQP, JMS, MQTT, REST, and WebSocket. As well, it can be deployed in on-premise datacenters, natively within private and public clouds, and across complex hybrid cloud environments.
+
+This repository provides an example of how to deploy the Solace PubSub+ Software Event Broker onto an OpenShift 4 platform, including the steps to set up a Red Hat OpenShift Container Platform platform on AWS.
 
 
 
-Contents:
-  * [Purpose of this Repository](#purpose-of-this-repository)
-  * [Description of Solace PubSub+ Software Event Broker](#description-of-solace-pubsub-software-event-broker)
-  * [Production Deployment Architecture](#production-deployment-architecture)
-  * [Deployment Options](#deployment-options)
-      - [Option 1, using Helm](#option-1-using-helm)
-      - [Option 2, using OpenShift templates](#option-2-using-openshift-templates)
-  * [How to deploy Solace PubSub+ onto OpenShift / AWS](#how-to-deploy-solace-pubsub-onto-openshift-aws)
-    + [Step 1: (Optional / AWS) Deploy a self-managed OpenShift Container Platform onto AWS](#step-1-optional-aws-deploy-a-self-managed-openshift-container-platform-onto-aws)
-    + [Step 2: Specify an OpenShift project for deployment](#step-2-specify-an-openshift-project-for-deployment)
-    + [Step 3: Optional: Using a Private Image Registry](#step-3-optional-using-a-private-image-registry)
-    + [Step 4-Option 1: Deploy using Helm](#step-4-option-1-deploy-using-helm)
-    + [Step 4-Option 2: Deploy using OpenShift Templates](#step-4-option-2-deploy-using-openshift-templates)
-  * [Validating the Deployment](#validating-the-deployment)
-    + [Viewing Bringup logs](#viewing-bringup-logs)
-  * [Gaining Admin and SSH access to the event broker](#gaining-admin-and-ssh-access-to-the-event-broker)
-  * [Testing data access to the event broker](#testing-data-access-to-the-event-broker)
-  * [Deleting a deployment](#deleting-a-deployment)
-    + [Deleting the PubSub+ deployment](#deleting-the-pubsub-deployment)
-    + [Deleting the AWS OpenShift Container Platform deployment](#deleting-the-aws-openshift-container-platform-deployment)
-  * [Special topics](#special-topics)
-    + [Using NFS for persistent storage](#using-nfs-for-persistent-storage)
-  * [Resources](#resources)
-
-## Purpose of this Repository
-
-This repository provides an example of how to deploy the Solace PubSub+ Software Event Broker onto an OpenShift 4 platform. There are [multiple ways](https://www.openshift.com/try ) to get to an OpenShift platform. This guide will specifically use the Red Hat OpenShift Container Platform for deploying an HA group with concepts transferable to other compatible platforms. There will be also hints on how to set up a simple single-node deployment using [CodeReady Containers](https://developers.redhat.com/products/codeready-containers/overview ) (the equivalent of MiniShift for OpenShift 4)  for development, testing or proof of concept purposes.
+## Overview
+There are [multiple ways](https://www.openshift.com/try ) to get to an OpenShift platform. This example uses the Red Hat OpenShift Container Platform for deploying an HA group of software event brokers, but the concepts are transferable to other compatible platforms. We also provide tips for how to set up a simple single-node deployment using [CodeReady Containers](https://developers.redhat.com/products/codeready-containers/overview ) (the equivalent of MiniShift for OpenShift 4) for development, testing, or proof of concept purposes.
 
 The supported Solace PubSub+ Software Event Broker version is 9.7 or later.
 
-For the Red Hat OpenShift Container Platform, we utilize a self-managed 60 day evaluation subscription of [RedHat OpenShift cluster in AWS](https://cloud.redhat.com/openshift/install#public-cloud ) in a highly redundant configuration, spanning 3 zones.
+For the Red Hat OpenShift Container Platform, we use a self-managed 60-day evaluation subscription of [RedHat OpenShift cluster in AWS](https://cloud.redhat.com/openshift/install#public-cloud ) in a highly redundant configuration, spanning three zones.
 
 This repository expands on the [Solace Kubernetes Quickstart](//github.com/SolaceProducts/pubsubplus-kubernetes-quickstart/blob/master/README.md ) to provide an example of how to deploy Solace PubSub+ in an HA configuration on the OpenShift Container Platform running in AWS.
 
-The event broker deployment does not require any special OpenShift Security Context, the [default "restricted" SCC](https://docs.openshift.com/container-platform/4.6/authentication/managing-security-context-constraints.html ) can be used.
+The event broker deployment does not require any special OpenShift Security Context; the default ["restricted" SCC](https://docs.openshift.com/container-platform/4.6/authentication/managing-security-context-constraints.html ) can be used.
 
-## Description of Solace PubSub+ Software Event Broker 
 
-Solace PubSub+ Software Event Broker meets the needs of big data, cloud migration, and Internet-of-Things initiatives, and enables microservices and event-driven architecture. Capabilities include topic-based publish/subscribe, request/reply, message queues/queueing, and data streaming for IoT devices and mobile/web apps. The event broker supports open APIs and standard protocols including AMQP, JMS, MQTT, REST, and WebSocket. As well, it can be deployed in on-premise datacenters, natively within private and public clouds, and across complex hybrid cloud environments.
+### Related Information
+
+You might also be interested in one of the following: 
+- For a hands-on quick start using an existing OpenShift platform, refer to the [Quick Start guide](/README.md).
+- For considerations about deploying in a general Kubernetes environment, refer to the [Solace PubSub+ on Kubernetes Documentation](https://github.com/SolaceProducts/pubsubplus-kubernetes-quickstart/blob/master/docs/PubSubPlusK8SDeployment.md)
+- For the `pubsubplus` Helm chart configuration options, refer to the [PubSub+ Software Event Broker Helm Chart Reference](https://github.com/SolaceProducts/pubsubplus-kubernetes-quickstart/tree/master/pubsubplus#configuration).
+- For OpenShift 3.11, refer to the [archived version of this project](https://github.com/SolaceProducts/pubsubplus-openshift-quickstart/tree/v1.1.1).
+
+
+## Table of Contents
+- [Production Deployment Architecture](#production-deployment-architecture)
+- [Deployment Tools](#deployment-tools)
+    - [Helm Charts](#helm-charts)
+    - [OpenShift Templates](#openshift-templates)
+- [How to deploy Solace PubSub+ onto OpenShift / AWS](#how-to-deploy-solace-pubsub-onto-openshift-aws)
+    - [Step 1: (Optional / AWS) Deploy a self-managed OpenShift Container Platform onto AWS](#step-1-optional-aws-deploy-a-self-managed-openshift-container-platform-onto-aws)
+    - [Step 2: Specify an OpenShift project for deployment](#step-2-specify-an-openshift-project-for-deployment)
+    - [Step 3: Optional: Using a Private Image Registry](#step-3-optional-using-a-private-image-registry)
+    - [Step 4, Option 1: Deploy Using Helm](#step-4-option-1-deploy-using-helm)
+    - [Step 4, Option 2: Deploy Using OpenShift Templates](#step-4-option-2-deploy-using-openshift-templates)
+- [Validating the Deployment](#validating-the-deployment)
+    - [Viewing Bringup logs](#viewing-bringup-logs)
+- [Gaining Admin and SSH access to the event broker](#gaining-admin-and-ssh-access-to-the-event-broker)
+- [Testing data access to the event broker](#testing-data-access-to-the-event-broker)
+- [Deleting a deployment](#deleting-a-deployment)
+    - [Deleting the PubSub+ deployment](#deleting-the-pubsub-deployment)
+    - [Deleting the AWS OpenShift Container Platform deployment](#deleting-the-aws-openshift-container-platform-deployment)
+- [Special topics](#special-topics)
+    - [Using NFS for persistent storage](#using-nfs-for-persistent-storage)
+- [Resources](#resources)
+
+
 
 ## Production Deployment Architecture
 
-The following diagram shows an example HA deployment in AWS:
+The following diagram shows an example of an HA group deployment of PubSub+ software event brokers in AWS:
 ![alt text](/docs/images/network_diagram.jpg "Network Diagram")
 
 <br/>
-Key parts are the three PubSub+ Container instances in OpenShift pods, deployed on OpenShift (worker) nodes; the cloud load balancer exposing the event router's services and management interface; the OpenShift master nodes(s); and the CLI console that hosts the `oc` OpenShift CLI utility client.
+The key parts to note in the diagram above are:
+- the three PubSub+ Container instances in OpenShift pods, deployed on OpenShift (worker) nodes
+- the cloud load balancer exposing the event router's services and management interface
+- the OpenShift master nodes(s)
+- the CLI console that hosts the `oc` OpenShift CLI utility client
 
-## Deployment Options
+## Deployment Tools
 
-#### Option 1, using Helm
+There are two options for tooling to use to deploy the Kubernetes cluster: Helm charts and OpenShift templates.
 
-This option allows great flexibility using the Kubernetes `Helm` tool to automate the process of event broker deployment through a wide range of configuration options including in-service rolling upgrade of the event broker. The [Solace Kubernetes QuickStart project](https://github.com/SolaceProducts/pubsubplus-kubernetes-quickstart/tree/master ) will be referred to deploy the event broker onto your OpenShift environment.
+#### Helm Charts
 
-#### Option 2, using OpenShift templates
+The Kubernetes `Helm` tool allows great flexibility, allowing the process of event broker deployment to be automated through a wide range of configuration options including in-service rolling upgrade of the event broker. This example refers to the [Solace Kubernetes QuickStart project](https://github.com/SolaceProducts/pubsubplus-kubernetes-quickstart/tree/master ) for the Helm setting to use to deploy the event broker onto your OpenShift environment.
 
-This option can be used directly, without any additional tool to deploy the event broker in a limited number of configurations, using OpenShift templates included in this project. Follow the [steps provided](#step-6-option-2-deploy-the-event-broker-using-the-openshift-templates-included-in-this-project).
+#### OpenShift Templates
+
+You can directly use the OpenShift templates included in this project, without any additional tools, to deploy the event broker in a limited number of configurations. Follow the instructions for deploying using OpenShift templates in [Step 4](#step-6-option-2-deploy-the-event-broker-using-the-openshift-templates-included-in-this-project), below.
 
 
 ## How to deploy Solace PubSub+ onto OpenShift / AWS
 
-The following steps describe how to deploy an event broker onto an OpenShift environment. Optional steps are provided about setting up a self-managed Red Hat OpenShift Container Platform on Amazon AWS infrastructure (marked as Optional / AWS) and if you use AWS Elastic Container Registry to host the Solace PubSub+ Docker image (marked as Optional / ECR).
+The following steps describe how to deploy an event broker onto an OpenShift environment. Optional steps are provided for:
+- setting up a self-managed Red Hat OpenShift Container Platform on Amazon AWS infrastructure (marked as *Optional / AWS*) 
+- using AWS Elastic Container Registry to host the Solace PubSub+ Docker image (marked as *Optional / ECR*).
 
-**Hint:** You may skip Step 1 if you already have your own OpenShift environment available.
+**Tip:** You can skip Step 1 if you already have your own OpenShift environment available.
 
-> Note: If using CodeReady Containers follow the [instructions to get to a working CodeReady Containers deployment](https://developers.redhat.com/products/codeready-containers/getting-started ). Linux, MacOS and Windows are supported. At the `crc start` step it helps to have a local `pullsecret` file created and also specify CPU and memory requirements, allowing 1 CPU and 2.5 GiB memory for CRC internal purposes. It also helps to specify a DNS server. Example: `crc start -p ./pullsecret -c 3 -m 8148 --nameserver 1.1.1.1`.
+> Note: If you are using CodeReady Containers, follow the [instructions to get to a working CodeReady Containers deployment](https://developers.redhat.com/products/codeready-containers/getting-started), which support Linux, MacOS, and Windows. At the `crc start` step it is helpful to:
+    - have a local `pullsecret` file created
+    - specify CPU and memory requirements, allowing 1 CPU and 2.5 GiB memory for CRC internal purposes
+    - specify a DNS server, for example: `crc start -p ./pullsecret -c 3 -m 8148 --nameserver 1.1.1.1`
 
 ### Step 1: (Optional / AWS) Deploy a self-managed OpenShift Container Platform onto AWS
 
 Pre-requisites:
-* This requires a free Red Hat account, [create one](https://developers.redhat.com/login ) if needed
-* A command console is required on your host platform with Internet access. Examples here are provided using Linux. MacOS is also supported.
-* Designate a working directory for the OpenShift cluster installation. Files created here by the automated install process will be required when deleting the OpenShift cluster.
+- This requires a free Red Hat account, [create one](https://developers.redhat.com/login ) if needed
+- A command console is required on your host platform with Internet access. Examples here are provided using Linux. MacOS is also supported.
+- Designate a working directory for the OpenShift cluster installation. Files created here by the automated install process will be required when deleting the OpenShift cluster.
 ```
 mkdir ~/workspace; cd ~/workspace
 ```
 
 Procedure:
-* From the [Install OpenShift Container Platform 4, In the public cloud](https://cloud.redhat.com/openshift/install#public-cloud ) section select "AWS", then "Installer-provisioned infrastructure". This will bring to a page with the required binaries and documentation.
-* On your host command console download and expand the "OpenShift installer"
+- From the [Install OpenShift Container Platform 4, In the public cloud](https://cloud.redhat.com/openshift/install#public-cloud ) section select "AWS", then "Installer-provisioned infrastructure". This will bring to a page with the required binaries and documentation.
+- On your host command console download and expand the "OpenShift installer"
 ```
 wget <link-address>  # copy here the link address from the "Download installer" button
 tar -xvf openshift-install-linux.tar.gz    # Adjust filename if needed
 rm openshift-install-linux.tar.gz
 ```
-* Run the utility to create an install configuration, provide information at the prompts including the Pull Secret from the RedHat instructions page. This will create the file `install-config.yaml` with [installation configuration parameters](https://docs.openshift.com/container-platform/4.6/installing/installing_aws/installing-aws-customizations.html#installation-aws-config-yaml_installing-aws-customizations), most importantly the configuration for the worker and master nodes.
+- Run the utility to create an install configuration, provide information at the prompts including the Pull Secret from the RedHat instructions page. This will create the file `install-config.yaml` with [installation configuration parameters](https://docs.openshift.com/container-platform/4.6/installing/installing_aws/installing-aws-customizations.html#installation-aws-config-yaml_installing-aws-customizations), most importantly the configuration for the worker and master nodes.
 ```
 ./openshift-install create install-config --dir=.
 ```
-* Edit `install-config.yaml` as the worker node AWS machine type needs to be updated from default to meet [minimum CPU and Memory requirements](https://github.com/SolaceProducts/pubsubplus-kubernetes-quickstart/blob/master/docs/PubSubPlusK8SDeployment.md#cpu-and-memory-requirements) for the targeted PubSub+ Software Event Broker configuration. When selecting an [EC2 instance type](https://aws.amazon.com/ec2/instance-types/) allow at least 1 CPU and 1GiB memory for OpenShift purposes that cannot be used by the broker. Here is an example updated configuration:
+- Edit `install-config.yaml` as the worker node AWS machine type needs to be updated from default to meet [minimum CPU and Memory requirements](https://github.com/SolaceProducts/pubsubplus-kubernetes-quickstart/blob/master/docs/PubSubPlusK8SDeployment.md#cpu-and-memory-requirements) for the targeted PubSub+ Software Event Broker configuration. When selecting an [EC2 instance type](https://aws.amazon.com/ec2/instance-types/) allow at least 1 CPU and 1GiB memory for OpenShift purposes that cannot be used by the broker. Here is an example updated configuration:
 ```
 ...
 compute:
@@ -110,20 +124,20 @@ compute:
   replicas: 3
 ...
 ```
-* Create a backup copy of the config file then launch the installation. This may take 40 minutes or more.
+- Create a backup copy of the config file then launch the installation. This may take 40 minutes or more.
 ```
 cp install-config.yaml install-config.yaml.bak
 ./openshift-install create cluster --dir=.
 ```
-* A successful installation will end with hints how to get started. Take notes for future reference.
+- A successful installation will end with hints how to get started. Take notes for future reference.
 ```
 INFO Install complete!
 INFO To access the cluster as the system:admin user when using 'oc', run 'export KUBECONFIG=/opt/auth/kubeconfig'
 INFO Access the OpenShift web-console here: https://console-openshift-console.apps.iuacc.soltest.net
 INFO Login to the console with user: "kubeadmin", and password: "CKGc9-XUT6J-PDtWp-d4DSQ"
 ```
-* [Install](https://docs.openshift.com/container-platform/4.6/installing/installing_aws/installing-aws-default.html#cli-installing-cli_installing-aws-default) the `oc` client CLI tool.
-* Follow above hints to get started, including verifying access to the web-console.
+- [Install](https://docs.openshift.com/container-platform/4.6/installing/installing_aws/installing-aws-default.html#cli-installing-cli_installing-aws-default) the `oc` client CLI tool.
+- Follow above hints to get started, including verifying access to the web-console.
 
 
 ### Step 2: Specify an OpenShift project for deployment
@@ -139,49 +153,49 @@ By default, deployment scripts will pull the Solace PubSub+ image from [Docker H
 
 If using a private image registry, such as AWS ECR, a pull secret is required to enable access to the registry. The followings will walk through how to use AWS ECR for the broker image.
 
-* Download a copy of the event broker image: go to the Solace Developer Portal and download the Solace PubSub+ as a **Docker** image or obtain your version from Solace Support.
-     * If using Solace PubSub+ Enterprise Evaluation Edition, go to the Solace Downloads page. For the image reference, copy and use the download URL in the Solace PubSub+ Enterprise Evaluation Edition Docker Images section.
+- Download a copy of the event broker image: go to the Solace Developer Portal and download the Solace PubSub+ as a **Docker** image or obtain your version from Solace Support.
+     - If using Solace PubSub+ Enterprise Evaluation Edition, go to the Solace Downloads page. For the image reference, copy and use the download URL in the Solace PubSub+ Enterprise Evaluation Edition Docker Images section.
 
          | PubSub+ Enterprise Evaluation Edition<br/>Docker Image
          | :---: |
          | 90-day trial version of PubSub+ Enterprise |
          | [Get URL of Evaluation Docker Image](http://dev.solace.com/downloads#eval ) |
-* Push the broker image to the private registry. Follow the specific procedures for the registry you are using, e.g.: [for the AWS ECR](https://docs.aws.amazon.com/AmazonECR/latest/userguide/getting-started-cli.html ).
+- Push the broker image to the private registry. Follow the specific procedures for the registry you are using, e.g.: [for the AWS ECR](https://docs.aws.amazon.com/AmazonECR/latest/userguide/getting-started-cli.html ).
 Note: if advised to run `aws ecr get-login-password` as part of the "Authenticate to your registry" step and it fails, try running `$(aws ecr get-login --region <your-registry-region> --no-include-email)` instead.
 ![alt text](/docs/images/ECR-Registry.png "ECR Registry")
-* Create a pull secret from the registry information in the Docker configuration. This assumes that ECR login happened on the same machine:
+- Create a pull secret from the registry information in the Docker configuration. This assumes that ECR login happened on the same machine:
 ```
 oc create secret generic <my-pullsecret> \
    --from-file=.dockerconfigjson=$(readlink -f ~/.docker/config.json) \
    --type=kubernetes.io/dockerconfigjson
 ```
-* Use `<my-pullsecret>` in following Step 4.
+- Use `<my-pullsecret>` in following Step 4.
 
 Additional information on private registries is also available from the Solace Kubernetes Quickstart documentation, refer to the [Using private registries](https://github.com/SolaceProducts/pubsubplus-kubernetes-quickstart/blob/master/docs/PubSubPlusK8SDeployment.md#using-private-registries) section.
 
 > Note: If using CodeReady Containers a workaround may be required if ECR login fails on the console (e.g. on Windows). In this case log into the OpenShift node: `oc get node`, then `oc debug node/<reported-node-name>`, finally execute `chroot /host` at the prompt. Since it is not straightforward to install the `aws` CLI on CoreOS running on the node, obtain `aws ecr get-login-password --region <ecr-region>` from a different machine where `aws` is installed. Then copy and paste it into this command: `echo "<paste-obtained-password-text>" | podman login --username AWS --password-stdin <registry>` - get `<registry>` from the URI from your ECR registry, in the example format of `9872397498329479394.dkr.ecr.us-east-2.amazonaws.com`. Then run `podman pull <your-ECR-image>` to load it locally on the CRC node. Exit the node and it will be possible to use your ECR image URL and tag for deployment (no need to use a pull secret here).
 
-### Step 4-Option 1: Deploy using Helm
+### Step 4, Option 1: Deploy using Helm
 
-Using Helm to deploy offers more flexibility in terms of event broker deployment options, compared to those offered by OpenShift templates (see [Option 2](#step-4-option-2-deploy-using-openshift-templates).
+Using Helm to deploy offers more flexibility in terms of event broker deployment options, compared to those offered by OpenShift templates (see [Option 2](#step-4-option-2-deploy-using-openshift-templates)).
 
 Additional information is provided in the following documents:
-* [Solace PubSub+ on Kubernetes Deployment Guide](//github.com/SolaceProducts/pubsubplus-kubernetes-quickstart/blob/master/docs/PubSubPlusK8SDeployment.md)
-* [Kubernetes Deployment Quick Start Guide](//github.com/SolaceProducts/pubsubplus-kubernetes-quickstart/blob/master/README.md)
+- [Solace PubSub+ on Kubernetes Deployment Guide](//github.com/SolaceProducts/pubsubplus-kubernetes-quickstart/blob/master/docs/PubSubPlusK8SDeployment.md)
+- [Kubernetes Deployment Quick Start Guide](//github.com/SolaceProducts/pubsubplus-kubernetes-quickstart/blob/master/README.md)
 
 The deployment is using PubSub+ Software Event Broker Helm charts and it is customized by overriding [default chart parameters](//github.com/SolaceProducts/pubsubplus-kubernetes-quickstart/tree/master/pubsubplus#configuration).
 
-* Consult the [Deployment Considerations](https://github.com/SolaceProducts/pubsubplus-kubernetes-quickstart/blob/master/docs/PubSubPlusK8SDeployment.md#pubsub-event-broker-deployment-considerations) section of the general Event Broker in Kubernetes Documentation when planning your deployment.
-* In particular, the `securityContext.enabled` parameter must be set to `false`, indicating not to use the provided pod security context but let OpenShift set it, using SecurityContextConstraints (SCC). By default OpenShift will use the "restricted" SCC.
-* By default the publicly available [latest Docker image of PubSub+ Standard Edition](https://hub.Docker.com/r/solace/solace-pubsub-standard/tags/) will be used. Use a different image tag if required or [use an image from a different registry](#step-3-optional-using-a-private-image-registry). If using a different image, add the `image.repository=<your-image-location>,image.tag=<your-image-tag>` values to the `--set` commands below, comma-separated. Also specify a pull secret is required: `image.pullSecretName=<my-pullsecret>`
-* The broker can be [vertically scaled](https://github.com/SolaceProducts/pubsubplus-kubernetes-quickstart/blob/master/docs/PubSubPlusK8SDeployment.md#deployment-scaling ) using the `solace.size` chart parameter.
+- Consult the [Deployment Considerations](https://github.com/SolaceProducts/pubsubplus-kubernetes-quickstart/blob/master/docs/PubSubPlusK8SDeployment.md#pubsub-event-broker-deployment-considerations) section of the general Event Broker in Kubernetes Documentation when planning your deployment.
+- In particular, the `securityContext.enabled` parameter must be set to `false`, indicating not to use the provided pod security context but let OpenShift set it, using SecurityContextConstraints (SCC). By default OpenShift will use the "restricted" SCC.
+- By default the latest publicly available [Docker image](https://hub.Docker.com/r/solace/solace-pubsub-standard/tags/) of PubSub+ Standard Edition is used. Use a different image tag if required or [use an image from a different registry](#step-3-optional-using-a-private-image-registry). If using a different image, add the `image.repository=<your-image-location>,image.tag=<your-image-tag>` values to the `--set` commands below, comma-separated. Also specify a pull secret is required: `image.pullSecretName=<my-pullsecret>`
+- The broker can be [vertically scaled](https://github.com/SolaceProducts/pubsubplus-kubernetes-quickstart/blob/master/docs/PubSubPlusK8SDeployment.md#deployment-scaling ) using the `solace.size` chart parameter.
 
 Procedure:
-* Install Helm: use the [instructions from Helm](//github.com/helm/helm#install) or if using Linux simply run following. Helm is configured properly if the command `helm version` returns no error.
+- Install Helm: use the [instructions from Helm](//github.com/helm/helm#install) or if using Linux simply run following. Helm is configured properly if the command `helm version` returns no error.
 ```bash
   curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
 ```
-* See following examples:
+- See following examples:
 
 _HA_ deployment example:
 ```bash
@@ -225,23 +239,23 @@ helm install --name my-release \
   solacecharts/pubsubplus
 ```
 
-### Step 4-Option 2: Deploy using OpenShift Templates
+### Step 4, Option 2: Deploy Using OpenShift Templates
 
 This deployment is using OpenShift templates and don't require Helm. It assumes [Step 2](#step-2-specify-an-openshift-project-for-deployment) and [optional step 3](#step-3-optional-using-a-private-image-registry) have been completed.
 
 Pre-requisites and notes:
-* Define a strong password for the 'admin' user of the event broker and then base64 encode the value.  This value will be specified as a parameter when processing the event broker OpenShift template:
+- Define a strong password for the 'admin' user of the event broker and then base64 encode the value.  This value will be specified as a parameter when processing the event broker OpenShift template:
 ```
 echo -n 'strong@dminPw!' | base64
 ```
-* DOCKER_REGISTRY_URL and EVENTBROKER_IMAGE_TAG default to `solace/solace-pubsub-standard` and `latest`.
-* Determine your event broker [disk space requirements](https://github.com/SolaceProducts/pubsubplus-kubernetes-quickstart/blob/master/docs/PubSubPlusK8SDeployment.md#disk-storage). `BROKER_STORAGE_SIZE` default is 30 gigabytes of disk space.
-* The template by default provides for a broker supporting 100 connections. Adjust `export system_scaling_maxconnectioncount` in the template for higher scaling but ensure adequate resources are available to the pod(s) by adjusting both `cpu` and `memory` requests and limits. Refer to the [System Requirements in the Solace documentation](//docs.solace.com/Configuring-and-Managing/SW-Broker-Specific-Config/Scaling-Tier-Resources.htm).
-* If using [TLS to access broker services](https://github.com/SolaceProducts/pubsubplus-kubernetes-quickstart/blob/master/docs/PubSubPlusK8SDeployment.md#enabling-use-of-tls-to-access-broker-services) server key and certificate configuration is required. Uncomment related parts of the template file in a local copy and additionally specify the `BROKER_TLS_CERT_SECRET` parameter.
+- DOCKER_REGISTRY_URL and EVENTBROKER_IMAGE_TAG default to `solace/solace-pubsub-standard` and `latest`.
+- Determine your event broker [disk space requirements](https://github.com/SolaceProducts/pubsubplus-kubernetes-quickstart/blob/master/docs/PubSubPlusK8SDeployment.md#disk-storage). `BROKER_STORAGE_SIZE` default is 30 gigabytes of disk space.
+- The template by default provides for a broker supporting 100 connections. Adjust `export system_scaling_maxconnectioncount` in the template for higher scaling but ensure adequate resources are available to the pod(s) by adjusting both `cpu` and `memory` requests and limits. Refer to the [System Requirements in the Solace documentation](//docs.solace.com/Configuring-and-Managing/SW-Broker-Specific-Config/Scaling-Tier-Resources.htm).
+- If using [TLS to access broker services](https://github.com/SolaceProducts/pubsubplus-kubernetes-quickstart/blob/master/docs/PubSubPlusK8SDeployment.md#enabling-use-of-tls-to-access-broker-services) server key and certificate configuration is required. Uncomment related parts of the template file in a local copy and additionally specify the `BROKER_TLS_CERT_SECRET` parameter.
 
 Procedure:
 
-* See following examples
+- See following examples
 
 Note: Default parameters can be omitted. Templates files can also be copied from GitHub location on local disk, edited and used from there.
 
@@ -372,18 +386,18 @@ Find the **'LoadBalancer Ingress'** value listed in the service description abov
 
 To see the deployment events, navigate to:
 
-* **OpenShift UI > (Your Project) > Applications > Stateful Sets > ((name)-pubsubplus) > Events**
+- **OpenShift UI > (Your Project) > Applications > Stateful Sets > ((name)-pubsubplus) > Events**
 
 You can access the log stack for individual event broker pods from the OpenShift UI, by navigating to:
 
-* **OpenShift UI > (Your Project) > Applications > Stateful Sets > ((name)-pubsubplus) > Pods > ((name)-solace-(N)) > Logs**
+- **OpenShift UI > (Your Project) > Applications > Stateful Sets > ((name)-pubsubplus) > Pods > ((name)-solace-(N)) > Logs**
 
 ![alt text](/docs/images/Solace-Pod-Log-Stack.png "Event Broker Pod Log Stack")
 
 Where (N) above is the ordinal of the Solace PubSub+:
-  * 0 - Primary event broker
-  * 1 - Backup event broker
-  * 2 - Monitor event broker
+  - 0 - Primary event broker
+  - 1 - Backup event broker
+  - 2 - Monitor event broker
 
 ## Gaining Admin and SSH access to the event broker
 
@@ -402,7 +416,7 @@ oc exec -it XXX-XXX-pubsubplus-X -- bash  # adjust pod name to your deployment
 
 You can also gain access to the Solace CLI and container shell for individual event broker instances from the OpenShift UI.  A web-based terminal emulator is available from the OpenShift UI.  Navigate to an individual event broker Pod using the OpenShift UI:
 
-* **OpenShift UI > (Your Project) > Applications > Stateful Sets > ((name)-pubsubplus) > Pods > ((name)-pubsubplus-(N)) > Terminal**
+- **OpenShift UI > (Your Project) > Applications > Stateful Sets > ((name)-pubsubplus) > Pods > ((name)-pubsubplus-(N)) > Terminal**
 
 Once you have launched the terminal emulator to the event broker pod you may access the Solace CLI by executing the following command:
 
@@ -432,14 +446,14 @@ Note: the Host will be the Solace Connection URI. It may be necessary to [open u
 
 To delete the deployment or to start over from Step 6 in a clean state:
 
-* If used (Option 1) Helm to deploy, execute: 
+- If used (Option 1) Helm to deploy, execute: 
 
 ```
 helm list   # will list the releases (deployments)
 helm delete XXX-XXX  # will delete instances related to your deployment - "my-release" in the example above
 ```
 
-* If used (Option 2) OpenShift templates to deploy, use:
+- If used (Option 2) OpenShift templates to deploy, use:
 
 ```
 oc process -f <template-used> DEPLOYMENT_NAME=<deploymentname> | oc delete -f -
@@ -514,6 +528,6 @@ If using templates to deploy locate the volume mount for `softAdb` in the templa
 
 For more information about Solace technology in general please visit these resources:
 
-* The Solace Developer Portal website at: http://dev.solace.com
-* Understanding [Solace technology.](http://dev.solace.com/tech/)
-* Ask the [Solace community](http://dev.solace.com/community/).
+- The Solace Developer Portal website at: http://dev.solace.com
+- Understanding [Solace technology.](http://dev.solace.com/tech/)
+- Ask the [Solace community](http://dev.solace.com/community/).
