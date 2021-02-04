@@ -32,10 +32,10 @@ You might also be interested in one of the following:
 - [Deployment Tools](#deployment-tools)
     - [Helm Charts](#helm-charts)
     - [OpenShift Templates](#openshift-templates)
-- [How to deploy Solace PubSub+ onto OpenShift / AWS](#how-to-deploy-solace-pubsub-onto-openshift-aws)
-    - [Step 1: (Optional / AWS) Deploy a self-managed OpenShift Container Platform onto AWS](#step-1-optional-aws-deploy-a-self-managed-openshift-container-platform-onto-aws)
-    - [Step 2: Specify an OpenShift project for deployment](#step-2-specify-an-openshift-project-for-deployment)
-    - [Step 3: Optional: Using a Private Image Registry](#step-3-optional-using-a-private-image-registry)
+- [Deploying Solace PubSub+ onto OpenShift / AWS](#how-to-deploy-solace-pubsub-onto-openshift-aws)
+    - [Step 1: (Optional / AWS) Deploy a Self-Managed OpenShift Container Platform onto AWS](#step-1-optional-aws-deploy-a-self-managed-openshift-container-platform-onto-aws)
+    - [Step 2: Specify an OpenShift Project for Deployment](#step-2-specify-an-openshift-project-for-deployment)
+    - [Step 3: (Optional) Use a Private Image Registry](#step-3-optional-using-a-private-image-registry)
     - [Step 4, Option 1: Deploy Using Helm](#step-4-option-1-deploy-using-helm)
     - [Step 4, Option 2: Deploy Using OpenShift Templates](#step-4-option-2-deploy-using-openshift-templates)
 - [Validating the Deployment](#validating-the-deployment)
@@ -76,7 +76,7 @@ The Kubernetes `Helm` tool allows great flexibility, allowing the process of eve
 You can directly use the OpenShift templates included in this project, without any additional tools, to deploy the event broker in a limited number of configurations. Follow the instructions for deploying using OpenShift templates in [Step 4](#step-6-option-2-deploy-the-event-broker-using-the-openshift-templates-included-in-this-project), below.
 
 
-## How to deploy Solace PubSub+ onto OpenShift / AWS
+## Deploying Solace PubSub+ onto OpenShift / AWS
 
 The following steps describe how to deploy an event broker onto an OpenShift environment. Optional steps are provided for:
 - setting up a self-managed Red Hat OpenShift Container Platform on Amazon AWS infrastructure (marked as *Optional / AWS*) 
@@ -84,96 +84,108 @@ The following steps describe how to deploy an event broker onto an OpenShift env
 
 **Tip:** You can skip Step 1 if you already have your own OpenShift environment available.
 
-> Note: If you are using CodeReady Containers, follow the [instructions to get to a working CodeReady Containers deployment](https://developers.redhat.com/products/codeready-containers/getting-started), which support Linux, MacOS, and Windows. At the `crc start` step it is helpful to:
-    - have a local `pullsecret` file created
-    - specify CPU and memory requirements, allowing 1 CPU and 2.5 GiB memory for CRC internal purposes
-    - specify a DNS server, for example: `crc start -p ./pullsecret -c 3 -m 8148 --nameserver 1.1.1.1`
+> Note: If you are using CodeReady Containers, follow the [getting started instructions](https://developers.redhat.com/products/codeready-containers/getting-started) to stand up a working CodeReady Containers deployment that supports Linux, MacOS, and Windows. At the `crc start` step it is helpful to: have a local `pullsecret` file created; specify CPU and memory requirements, allowing 1 CPU and 2.5 GiB memory for CRC internal purposes; specify a DNS server, for example: `crc start -p ./pullsecret -c 3 -m 8148 --nameserver 1.1.1.1`.
 
-### Step 1: (Optional / AWS) Deploy a self-managed OpenShift Container Platform onto AWS
+### Step 1: (Optional / AWS) Deploy a Self-Managed OpenShift Container Platform onto AWS
 
-Pre-requisites:
-- This requires a free Red Hat account, [create one](https://developers.redhat.com/login ) if needed
-- A command console is required on your host platform with Internet access. Examples here are provided using Linux. MacOS is also supported.
-- Designate a working directory for the OpenShift cluster installation. Files created here by the automated install process will be required when deleting the OpenShift cluster.
-```
-mkdir ~/workspace; cd ~/workspace
-```
+This step requires the following:
+- a free Red Hat account. You can create one [here](https://developers.redhat.com/login ), if needed.
+- a command console on your host platform with Internet access. The examples here are for Linux, but MacOS is also supported.
+- a designated working directory for the OpenShift cluster installation. The automated install process creates files here that are required later for deleting the OpenShift cluster.
+    ```
+    mkdir ~/workspace; cd ~/workspace
+    ```
 
-Procedure:
-- From the [Install OpenShift Container Platform 4, In the public cloud](https://cloud.redhat.com/openshift/install#public-cloud ) section select "AWS", then "Installer-provisioned infrastructure". This will bring to a page with the required binaries and documentation.
-- On your host command console download and expand the "OpenShift installer"
-```
-wget <link-address>  # copy here the link address from the "Download installer" button
-tar -xvf openshift-install-linux.tar.gz    # Adjust filename if needed
-rm openshift-install-linux.tar.gz
-```
-- Run the utility to create an install configuration, provide information at the prompts including the Pull Secret from the RedHat instructions page. This will create the file `install-config.yaml` with [installation configuration parameters](https://docs.openshift.com/container-platform/4.6/installing/installing_aws/installing-aws-customizations.html#installation-aws-config-yaml_installing-aws-customizations), most importantly the configuration for the worker and master nodes.
-```
-./openshift-install create install-config --dir=.
-```
-- Edit `install-config.yaml` as the worker node AWS machine type needs to be updated from default to meet [minimum CPU and Memory requirements](https://github.com/SolaceProducts/pubsubplus-kubernetes-quickstart/blob/master/docs/PubSubPlusK8SDeployment.md#cpu-and-memory-requirements) for the targeted PubSub+ Software Event Broker configuration. When selecting an [EC2 instance type](https://aws.amazon.com/ec2/instance-types/) allow at least 1 CPU and 1GiB memory for OpenShift purposes that cannot be used by the broker. Here is an example updated configuration:
-```
-...
-compute:
-- architecture: amd64
-  hyperthreading: Enabled
-  name: worker
-  platform:
-    aws:
-      type: m5.2xlarge  # Adjust to your requirements
-  replicas: 3
-...
-```
-- Create a backup copy of the config file then launch the installation. This may take 40 minutes or more.
-```
-cp install-config.yaml install-config.yaml.bak
-./openshift-install create cluster --dir=.
-```
-- A successful installation will end with hints how to get started. Take notes for future reference.
-```
-INFO Install complete!
-INFO To access the cluster as the system:admin user when using 'oc', run 'export KUBECONFIG=/opt/auth/kubeconfig'
-INFO Access the OpenShift web-console here: https://console-openshift-console.apps.iuacc.soltest.net
-INFO Login to the console with user: "kubeadmin", and password: "CKGc9-XUT6J-PDtWp-d4DSQ"
-```
-- [Install](https://docs.openshift.com/container-platform/4.6/installing/installing_aws/installing-aws-default.html#cli-installing-cli_installing-aws-default) the `oc` client CLI tool.
-- Follow above hints to get started, including verifying access to the web-console.
+To deploy the container platform in AWS, do the following:
+1. If you haven't already, log in to your RedHat account.
+2. On the [**Create an OpenShift cluster**](https://cloud.redhat.com/openshift/create) page, under **Run it yourself**, select **AWS**. 
+3. On the [**Install OpenShift Container Platform 4**](https://cloud.redhat.com/openshift/install#public-cloud ) page, select **Installer-provisioned infrastructure**. A page is displayed that allows you to download the the required binaries and documentation.
+4. On your host command console download and expand the OpenShift installer:
+    ```
+    wget <link-address>  # copy here the link address from the "Download installer" button
+    tar -xvf openshift-install-linux.tar.gz    # Adjust the filename if needed
+    rm openshift-install-linux.tar.gz
+    ```
+5. Run the utility to create an install configuration. Provide the necessary information at the prompts, including the Pull Secret from the RedHat instructions page. This will create the file `install-config.yaml` with the [installation configuration parameters](https://docs.openshift.com/container-platform/4.6/installing/installing_aws/installing-aws-customizations.html#installation-aws-config-yaml_installing-aws-customizations), most importantly the configuration for the worker and master nodes.
+    ```
+    ./openshift-install create install-config --dir=.
+    ```
+6. Edit the `install-config.yaml` file to update the worker node AWS machine type to meet the [minimum CPU and Memory requirements](https://github.com/SolaceProducts/pubsubplus-kubernetes-quickstart/blob/master/docs/PubSubPlusK8SDeployment.md#cpu-and-memory-requirements) for the targeted PubSub+ Software Event Broker configuration. When you select an [EC2 instance type](https://aws.amazon.com/ec2/instance-types/), allow at least 1 CPU and 1 GiB memory for OpenShift purposes that cannot be used by the broker. The following is an example updated configuration:
+    ```
+    ...
+    compute:
+    - architecture: amd64
+      hyperthreading: Enabled
+      name: worker
+      platform:
+        aws:
+          type: m5.2xlarge  # Adjust to your requirements
+      replicas: 3
+    ...
+    ```
+7. Create a backup copy of the configuration file, then launch the installation. The installation may take 40 minutes or more.
+    ```
+    cp install-config.yaml install-config.yaml.bak
+    ./openshift-install create cluster --dir=.
+    ```
+8. If the installation is successful, information similar to the following is written to the command console. Take notes for future reference.
+    ```
+    INFO Install complete!
+    INFO To access the cluster as the system:admin user when using 'oc', run 'export KUBECONFIG=/opt/auth/kubeconfig'
+    INFO Access the OpenShift web-console here: https://console-openshift-console.apps.iuacc.soltest.net
+    INFO Login to the console with user: "kubeadmin", and password: "CKGc9-XUT6J-PDtWp-d4DSQ"
+    ```
+9. [Install](https://docs.openshift.com/container-platform/4.6/installing/installing_aws/installing-aws-default.html#cli-installing-cli_installing-aws-default) the `oc` client CLI tool.
+10. Verify that your cluster is working correctly by following the hints from step 8, including verifying access to the OpenShift web-console.
 
 
-### Step 2: Specify an OpenShift project for deployment
+### Step 2: Specify an OpenShift Project for Deployment
 
-Create a new project or switch to your existing project (do not use the `default` project as it's loose permissions doesn't reflect a typical OpenShift environment)
-```
-oc new-project solace-pubsub    # adjust your project name as needed here and in subsequent commands
-```
+Create a new project or switch to your existing project (do not use the `default` project as its loose permissions doesn't reflect a typical OpenShift environment):
+    ```
+    oc new-project solace-pubsub    # adjust your project name as needed here and in subsequent commands
+    ```
 
-### Step 3: Optional: Using a Private Image Registry
+### Step 3: (Optional) Use a Private Image Registry
 
-By default, deployment scripts will pull the Solace PubSub+ image from [Docker Hub](https://hub.docker.com/r/solace/solace-pubsub-standard/tags?page=1&ordering=last_updated ) and assuming Internet access of the OpenShift worker nodes no further configuration is required.
+By default, the deployment scripts pull the Solace PubSub+ image from [Docker Hub](https://hub.docker.com/r/solace/solace-pubsub-standard/tags?page=1&ordering=last_updated). If the OpenShift worker nodes have Internet access, no further configuration is required.
 
-If using a private image registry, such as AWS ECR, a pull secret is required to enable access to the registry. The followings will walk through how to use AWS ECR for the broker image.
+However, if you need to use a private image registry, such as AWS ECR, you must supply a pull secret to enable access to the registry. The steps that follow show how to use AWS ECR for the broker image.
 
-- Download a copy of the event broker image: go to the Solace Developer Portal and download the Solace PubSub+ as a **Docker** image or obtain your version from Solace Support.
+1. Download a copy of the event broker image: go to the Solace Developer Portal and download the Solace PubSub+ as a **Docker** image or obtain your version from Solace Support.
      - If using Solace PubSub+ Enterprise Evaluation Edition, go to the Solace Downloads page. For the image reference, copy and use the download URL in the Solace PubSub+ Enterprise Evaluation Edition Docker Images section.
 
          | PubSub+ Enterprise Evaluation Edition<br/>Docker Image
          | :---: |
          | 90-day trial version of PubSub+ Enterprise |
          | [Get URL of Evaluation Docker Image](http://dev.solace.com/downloads#eval ) |
-- Push the broker image to the private registry. Follow the specific procedures for the registry you are using, e.g.: [for the AWS ECR](https://docs.aws.amazon.com/AmazonECR/latest/userguide/getting-started-cli.html ).
+2. Push the broker image to the private registry. Follow the specific procedures for the registry you are using, e.g.: [for the AWS ECR](https://docs.aws.amazon.com/AmazonECR/latest/userguide/getting-started-cli.html ).
 Note: if advised to run `aws ecr get-login-password` as part of the "Authenticate to your registry" step and it fails, try running `$(aws ecr get-login --region <your-registry-region> --no-include-email)` instead.
 ![alt text](/docs/images/ECR-Registry.png "ECR Registry")
-- Create a pull secret from the registry information in the Docker configuration. This assumes that ECR login happened on the same machine:
-```
-oc create secret generic <my-pullsecret> \
-   --from-file=.dockerconfigjson=$(readlink -f ~/.docker/config.json) \
-   --type=kubernetes.io/dockerconfigjson
-```
-- Use `<my-pullsecret>` in following Step 4.
+3. Create a pull secret from the registry information in the Docker configuration. This assumes that ECR login happened on the same machine:
+    ```
+    oc create secret generic <my-pullsecret> \
+       --from-file=.dockerconfigjson=$(readlink -f ~/.docker/config.json) \
+       --type=kubernetes.io/dockerconfigjson
+    ```
+4. Use `<my-pullsecret>` in the deployment section below.
 
 Additional information on private registries is also available from the Solace Kubernetes Quickstart documentation, refer to the [Using private registries](https://github.com/SolaceProducts/pubsubplus-kubernetes-quickstart/blob/master/docs/PubSubPlusK8SDeployment.md#using-private-registries) section.
 
-> Note: If using CodeReady Containers a workaround may be required if ECR login fails on the console (e.g. on Windows). In this case log into the OpenShift node: `oc get node`, then `oc debug node/<reported-node-name>`, finally execute `chroot /host` at the prompt. Since it is not straightforward to install the `aws` CLI on CoreOS running on the node, obtain `aws ecr get-login-password --region <ecr-region>` from a different machine where `aws` is installed. Then copy and paste it into this command: `echo "<paste-obtained-password-text>" | podman login --username AWS --password-stdin <registry>` - get `<registry>` from the URI from your ECR registry, in the example format of `9872397498329479394.dkr.ecr.us-east-2.amazonaws.com`. Then run `podman pull <your-ECR-image>` to load it locally on the CRC node. Exit the node and it will be possible to use your ECR image URL and tag for deployment (no need to use a pull secret here).
+#### Using CodeReady Containers
+If you are using CodeReady Containers, you may need to perform a workaround if the ECR login fails on the console (e.g., on Windows). In this case, do the following:
+1. Log into the OpenShift node: `oc get node` 
+2. Run the `oc debug node/<reported-node-name>` command.
+3. At the prompt, run the `chroot /host` command.
+4. Run the following command:
+    ````
+    echo "<password-text>" | podman login --username AWS --password-stdin <registry>
+    ````
+    Where:
+    - `<password-text>`: The text returned from the [`aws ecr get-login-password --region <ecr-region>`](https://docs.aws.amazon.com/cli/latest/reference/ecr/get-login-password.html) command. Run this command from a different machine where `aws` is installed (it is not straightforward to install the `aws` CLI on the CoreOS running on the node).
+    - `<registry>`: The URI for your ECR registry, for example `9872397498329479394.dkr.ecr.us-east-2.amazonaws.com`.
+5. Run `podman pull <your-ECR-image>` to load the image locally on the CRC node. 
+    After you exit the node, you can use your ECR image URL and tag for the deployment (no need to use a pull secret here).
 
 ### Step 4, Option 1: Deploy using Helm
 
@@ -183,7 +195,7 @@ Additional information is provided in the following documents:
 - [Solace PubSub+ on Kubernetes Deployment Guide](//github.com/SolaceProducts/pubsubplus-kubernetes-quickstart/blob/master/docs/PubSubPlusK8SDeployment.md)
 - [Kubernetes Deployment Quick Start Guide](//github.com/SolaceProducts/pubsubplus-kubernetes-quickstart/blob/master/README.md)
 
-The deployment is using PubSub+ Software Event Broker Helm charts and it is customized by overriding [default chart parameters](//github.com/SolaceProducts/pubsubplus-kubernetes-quickstart/tree/master/pubsubplus#configuration).
+The deployment uses PubSub+ Software Event Broker Helm charts. You can customize it by overriding the [default chart parameters](//github.com/SolaceProducts/pubsubplus-kubernetes-quickstart/tree/master/pubsubplus#configuration).
 
 - Consult the [Deployment Considerations](https://github.com/SolaceProducts/pubsubplus-kubernetes-quickstart/blob/master/docs/PubSubPlusK8SDeployment.md#pubsub-event-broker-deployment-considerations) section of the general Event Broker in Kubernetes Documentation when planning your deployment.
 - In particular, the `securityContext.enabled` parameter must be set to `false`, indicating not to use the provided pod security context but let OpenShift set it, using SecurityContextConstraints (SCC). By default OpenShift will use the "restricted" SCC.
