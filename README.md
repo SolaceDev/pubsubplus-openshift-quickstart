@@ -109,7 +109,7 @@ Helm is configured properly if the `helm version` command returns no error.
 
 If you have any problems, refer to the [Troubleshooting](https://github.com/SolaceProducts/pubsubplus-kubernetes-quickstart/blob/master/docs/PubSubPlusK8SDeployment.md#troubleshooting) section of the general PubSub+ Kubernetes Documentation—substitute any `kubectl` commands with `oc` commands.
 
-If you need to start over, follow the [steps to delete the current deployment](/docs/PubSubPlusOpenShiftDeployment.md#deleting-the-pubsub-event-broker-deployment).
+If you need to start over, follow the [steps to delete the current deployment](/docs/PubSubPlusOpenShiftDeployment.md##delete-the-pubsub-deployment).
 
 
 ## Contributing

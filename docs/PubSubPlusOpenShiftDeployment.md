@@ -32,8 +32,8 @@ You might also be interested in one of the following:
 - [Deployment Tools](#deployment-tools)
     - [Helm Charts](#helm-charts)
     - [OpenShift Templates](#openshift-templates)
-- [Deploying Solace PubSub+ onto OpenShift / AWS](#deployin-solace-pubsub-onto-openshift-aws)
-    - [Step 1: (Optional / AWS) Deploy a Self-Managed OpenShift Container Platform onto AWS](#step-1-optional-aws-deploy-a-self-managed-openshift-container-platform-onto-aws)
+- [Deploying Solace PubSub+ onto OpenShift / AWS](#deploying-solace-pubsub-onto-openshift--aws)
+    - [Step 1: (Optional / AWS) Deploy a Self-Managed OpenShift Container Platform onto AWS](#step-1-optional--aws-deploy-a-self-managed-openshift-container-platform-onto-aws)
     - [Step 2: Specify an OpenShift Project for Deployment](#step-2-specify-an-openshift-project-for-deployment)
     - [Step 3: (Optional) Use a Private Image Registry](#step-3-optional-use-a-private-image-registry)
     - [Step 4, Option 1: Deploy Using Helm](#step-4-option-1-deploy-using-helm)
@@ -44,10 +44,9 @@ You might also be interested in one of the following:
 - [Testing Data Access to the Event Broker](#testing-data-access-to-the-event-broker)
 - [Deleting a Deployment](#deleting-a-deployment)
     - [Delete the PubSub+ Deployment](#delete-the-pubsub-deployment)
-    - [Delete the AWS OpenShift Container Platform Deployment](#delete-the-aws-openshift-container-platform-deployment)
+    - [Delete the AWS OpenShift Container Platform Deployment](#deleting-the-aws-openshift-container-platform-deployment)
 - [Using NFS for Persistent Storage](#using-nfs-for-persistent-storage)
 - [Resources](#resources)
-
 
 
 ## Production Deployment Architecture
