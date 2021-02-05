@@ -35,7 +35,7 @@ You might also be interested in one of the following:
 - [Deploying Solace PubSub+ onto OpenShift / AWS](#deploying-solace-pubsub-onto-openshift--aws)
     - [Step 1: (Optional / AWS) Deploy a Self-Managed OpenShift Container Platform onto AWS](#step-1-optional--aws-deploy-a-self-managed-openshift-container-platform-onto-aws)
     - [Step 2: Specify an OpenShift Project for Deployment](#step-2-specify-an-openshift-project-for-deployment)
-    - [Step 3: (Optional) Use a Private Image Registry](#step-3-optional-use-a-private-image-registry)
+    - [Step 3: (Optional / ECR) Use a Private Image Registry](#step-3-optional--ECR-use-a-private-image-registry)
     - [Step 4, Option 1: Deploy Using Helm](#step-4-option-1-deploy-using-helm)
     - [Step 4, Option 2: Deploy Using OpenShift Templates](#step-4-option-2-deploy-using-openshift-templates)
 - [Validating the Deployment](#validating-the-deployment)
@@ -71,7 +71,7 @@ The Kubernetes `Helm` tool allows great flexibility, allowing the process of eve
 
 #### OpenShift Templates
 
-You can directly use the OpenShift templates included in this project, without any additional tools, to deploy the event broker in a limited number of configurations. Follow the instructions for deploying using OpenShift templates in [Step 4](#step-6-option-2-deploy-the-event-broker-using-the-openshift-templates-included-in-this-project), below.
+You can directly use the OpenShift templates included in this project, without any additional tools, to deploy the event broker in a limited number of configurations. Follow the instructions for deploying using OpenShift templates in [Step 4, Option 2](#step-4-option-2-deploy-using-openshift-templates), below.
 
 
 ## Deploying Solace PubSub+ onto OpenShift / AWS
@@ -145,7 +145,7 @@ Create a new project or switch to your existing project (do not use the `default
     oc new-project solace-pubsub    # adjust your project name as needed here and in subsequent commands
     ```
 
-### Step 3: (Optional) Use a Private Image Registry
+### Step 3: (Optional / ECR) Use a Private Image Registry
 
 By default, the deployment scripts pull the Solace PubSub+ image from [Docker Hub](https://hub.docker.com/r/solace/solace-pubsub-standard/tags?page=1&ordering=last_updated). If the OpenShift worker nodes have Internet access, no further configuration is required.
 
@@ -163,7 +163,7 @@ However, if you need to use a private image registry, such as AWS ECR, you must 
     ```
 4. Use the pull secret you just created (`<my-pullsecret>`) in the deployment section, Step 4, below.
 
-Additional information on private registries is also available from the Solace Kubernetes Quickstart documentation, refer to the [Using private registries](https://github.com/SolaceProducts/pubsubplus-kubernetes-quickstart/blob/master/docs/PubSubPlusK8SDeployment.md#using-private-registries) section.
+For additional information on private registries, see the [Using private registries](https://github.com/SolaceProducts/pubsubplus-kubernetes-quickstart/blob/master/docs/PubSubPlusK8SDeployment.md#using-private-registries) section of the Solace Kubernetes Quickstart documentation.
 
 #### Using CodeReady Containers
 If you are using CodeReady Containers, you may need to perform a workaround if the ECR login fails on the console (e.g., on Windows). In this case, do the following:
@@ -269,7 +269,7 @@ This option use an OpenShift template and doesn't require Helm. This option assu
 2. Follow one of the examples below to deploy your cluster.
 
 
-    ##### For a Single-node, _non-HA_ Deployment:
+    ##### For a Single-Node, _Non-HA_ Deployment:
     This example uses all default values.  You can omit default parameters.
 
     ```
@@ -283,7 +283,7 @@ This option use an OpenShift template and doesn't require Helm. This option assu
     ##### For an _HA_ Deployment:
     In this example, we specify values for all parameters.
 
-    The `BROKER_IMAGE_REGISTRY_URL` and `BROKER_IMAGE_TAG` parameters default to *solace/solace-pubsub-standard* and *latest*, respectively.
+    The `BROKER_IMAGE_REGISTRY_URL` and `BROKER_IMAGE_TAG` parameters default to **solace/solace-pubsub-standard** and **latest**, respectively.
 
     ```
     oc process -f https://raw.githubusercontent.com/SolaceProducts/pubsubplus-openshift-quickstart/master/templates/eventbroker_ha_template.yaml \
@@ -301,7 +301,7 @@ This option use an OpenShift template and doesn't require Helm. This option assu
   
 ## Validating the Deployment
 
-If you encounter any issues with your deployment, refer to the [Kubernetes Troubleshooting Guide](https://github.com/SolaceProducts/pubsubplus-kubernetes-quickstart/blob/master/docs/PubSubPlusK8SDeployment.md#troubleshooting). Substitute any `kubectl` commands with `oc` commands. Before retrying a deployment, ensure to delete PVCs remaining from the unsuccessful deployment. Use the `oc get pvc` command to obtain a listing.
+If you encounter any issues with your deployment, refer to the [Kubernetes Troubleshooting Guide](https://github.com/SolaceProducts/pubsubplus-kubernetes-quickstart/blob/master/docs/PubSubPlusK8SDeployment.md#troubleshooting) for help. Substitute any `kubectl` commands with `oc` commands. Before retrying a deployment, ensure to delete PVCs remaining from the unsuccessful deployment. Use the `oc get pvc` command to obtain a listing.
 
 From the console, validate your deployment by running the following command:
 ```
@@ -396,7 +396,7 @@ Events:                   <none>
 
 Find the **'LoadBalancer Ingress'** value listed in the service description above. This is the publicly accessible Solace Connection URI for messaging clients and management. In the example, it is `a7d53a67e0d3911eaab100663456a67b-73396344.eu-central-1.elb.amazonaws.com`.
 
-> **Note**: There is no Load Balancer support with CodeReady Containers--services are accessed through NodePorts instead. To access the brokers, use the NodePort port numbers together with the CodeReady Containers' public IP addresses, which can be obtained by running the `crc ip` command.
+> **Note**: There is no Load Balancer support with CodeReady Containers. Services are accessed through NodePorts instead. To access the brokers, use the NodePort port numbers together with the CodeReady Containers' public IP addresses, which can be obtained by running the `crc ip` command.
 
 ### Viewing the Bringup Logs
 
@@ -407,13 +407,13 @@ To see the deployment events, navigate to:
 You can access the log stack for individual event broker pods from the OpenShift UI, by navigating to:
 
 - **OpenShift UI > (Your Project) > Applications > Stateful Sets > ((name)-pubsubplus) > Pods > ((name)-solace-(N)) > Logs**
+    Where **(N)** above is the ordinal of the HA role of the PubSub+ broker:
+      - 0 - Primary event broker
+      - 1 - Backup event broker
+      - 2 - Monitor event broker
 
 ![alt text](/docs/images/Solace-Pod-Log-Stack.png "Event Broker Pod Log Stack")
 
-Where (N) above is the ordinal of the HA role of the PubSub+ broker:
-  - 0 - Primary event broker
-  - 1 - Backup event broker
-  - 2 - Monitor event broker
 
 ## Gaining Admin and SSH Access to the Event Broker
 
@@ -461,16 +461,16 @@ You can delete just the PubSub+ deployment, or tear down your entire AWS OpenShi
 
 ### Delete the PubSub+ Deployment
 
-To delete the deployment or to start over from Step 6 in a clean state, do the following:
+To delete the deployment or to start over from Step 4 in a clean state, do the following:
 
-- If you used Option 1 (Helm) to deploy, execute the following commands: 
+- If you used [Step 4, Option 1 (Helm)][#step-4-option-1-deploy-using-helm] to deploy, execute the following commands: 
 
     ```
     helm list            # lists the releases (deployments)
     helm delete XXX-XXX  # deletes instances related to your deployment - "my-release" in the example above
     ```
 
-- If you used Option 2 (OpenShift templates) to deploy, run the following:
+- If you used [Step 4, Option 2 (OpenShift templates)](#step-4-option-2-deploy-using-openshift-templates) to deploy, run the following:
 
     ```
     oc process -f <template-used> DEPLOYMENT_NAME=<deploymentname> | oc delete -f -
@@ -487,7 +487,7 @@ oc get pvc
 oc delete pvc <pvc-name>
 ```
 
-To remove the project or to start over from Step 4 in a clean state, delete the project using the OpenShift console or the command line: 
+To remove the project or to start over from [Step 2](#step-2-specify-an-openshift-project-for-deployment) in a clean state, delete the project using the OpenShift console or the command line: 
 ```
 oc delete project solace-pubsub   # adjust your project name as needed
 ```
@@ -495,7 +495,7 @@ For more details, refer to the [OpenShift Projects](https://docs.openshift.com/e
 
 ### Deleting the AWS OpenShift Container Platform Deployment
 
-To delete your OpenShift Container Platform deployment that was set up at Step 1, run the following commands:
+To delete your OpenShift Container Platform deployment that was set up at [Step 1](#step-1-optional--aws-deploy-a-self-managed-openshift-container-platform-onto-aws), run the following commands:
 
 ```
 cd ~/workspace
