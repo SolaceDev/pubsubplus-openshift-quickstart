@@ -407,10 +407,11 @@ To see the deployment events, navigate to:
 You can access the log stack for individual event broker pods from the OpenShift UI, by navigating to:
 
 - **OpenShift UI > (Your Project) > Applications > Stateful Sets > ((name)-pubsubplus) > Pods > ((name)-solace-(N)) > Logs**
+
     Where **(N)** above is the ordinal of the HA role of the PubSub+ broker:
-      - 0 - Primary event broker
-      - 1 - Backup event broker
-      - 2 - Monitor event broker
+    - 0: Primary event broker
+    - 1: Backup event broker
+    - 2: Monitor event broker
 
 ![alt text](/docs/images/Solace-Pod-Log-Stack.png "Event Broker Pod Log Stack")
 
@@ -463,7 +464,7 @@ You can delete just the PubSub+ deployment, or tear down your entire AWS OpenShi
 
 To delete the deployment or to start over from Step 4 in a clean state, do the following:
 
-- If you used [Step 4, Option 1 (Helm)][#step-4-option-1-deploy-using-helm] to deploy, execute the following commands: 
+- If you used [Step 4, Option 1 (Helm)](#step-4-option-1-deploy-using-helm) to deploy, execute the following commands: 
 
     ```
     helm list            # lists the releases (deployments)
@@ -538,12 +539,13 @@ The Helm (NFS Server Provisioner)[https://github.com/helm/charts/tree/master/sta
     ```
 
 If you're using a template to deploy, locate the volume mount for `softAdb` in the template and disable it by commenting it out:
-    ```yaml
-    # only mount softAdb when not using NFS, comment it out otherwise
-    #- name: data
-    #  mountPath: /usr/sw/internalSpool/softAdb
-    #  subPath: softAdb
-    ```
+
+```yaml
+# only mount softAdb when not using NFS, comment it out otherwise
+#- name: data
+#  mountPath: /usr/sw/internalSpool/softAdb
+#  subPath: softAdb
+```
 
 ## Resources
 
