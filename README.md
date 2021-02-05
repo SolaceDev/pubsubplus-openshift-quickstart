@@ -12,7 +12,7 @@ For detailed instructions, see [Deploying a Solace PubSub+ Software Event Broker
 
 The PubSub+ deployment does not require any special OpenShift Security Context; the default `restricted` SCC can be used.
 
-We recommend using the Helm tool for convenience. An alternative method [using OpenShift templates](/docs/PubSubPlusOpenShiftDeployment.md#step-6-option-2-deploy-the-event-broker-using-the-openshift-templates-included-in-this-project) is also available.
+We recommend using the Helm tool for convenience. An alternative method [using OpenShift templates](/docs/PubSubPlusOpenShiftDeployment.md#step-4-option-2-deploy-using-openshift-templates) is also available.
 
 ## Deploying PubSub+ Software Event Broker
 
@@ -30,9 +30,9 @@ For other event broker configurations or sizes, refer to the [PubSub+ Software E
 ### Step 1: Get an OpenShift Environment
 
 There are [multiple ways](https://www.openshift.com/try ) to get to an OpenShift 4 platform:
-* The detailed [Event Broker on OpenShift](/docs/PubSubPlusOpenShiftDeployment.md#step-1-optional--aws-deploy-openshift-container-platform-onto-aws-using-the-redhat-openshift-aws-quickstart-project) documentation describes how to set up production-ready Red Hat OpenShift Container Platform platform on AWS.
-* An option for developers is to locally deploy an all-in-one environment using [CodeReady Containers](https://developers.redhat.com/products/codeready-containers/overview).
-* An easy way to get an OpenShift cluster up and running is through the [Developer Sandbox](https://developers.redhat.com/developer-sandbox) program. You can sign up for a free 14-day trial.
+- The detailed [Event Broker on OpenShift](/docs/PubSubPlusOpenShiftDeployment.md#step-1-optional--aws-deploy-a-self-managed-openshift-container-platform-onto-aws) documentation describes how to set up production-ready Red Hat OpenShift Container Platform platform on AWS.
+- An option for developers is to locally deploy an all-in-one environment using [CodeReady Containers](https://developers.redhat.com/products/codeready-containers/overview).
+- An easy way to get an OpenShift cluster up and running is through the [Developer Sandbox](https://developers.redhat.com/developer-sandbox) program. You can sign up for a free 14-day trial.
 
 Assuming you have access to an OpenShift 4 platform, log in as `kubeadmin` using the `oc login -u kubeadmin` command.
 
@@ -57,7 +57,7 @@ Helm is configured properly if the `helm version` command returns no error.
 
 1. Add the Solace Helm charts to your local Helm repo:
     ```bash
-    elm repo add solacecharts https://solaceproducts.github.io/pubsubplus-kubernetes-quickstart/helm-charts
+    helm repo add solacecharts https://solaceproducts.github.io/pubsubplus-kubernetes-quickstart/helm-charts
     ```
 
 2. Create a new project or switch to your existing project (do not use the `default` project as its loose permissions don't reflect a typical OpenShift environment)
@@ -105,11 +105,11 @@ Helm is configured properly if the `helm version` command returns no error.
 
 4. Wait for the deployment to complete, following any instructions that are written to the console. You can now [validate the deployment and try the management and messaging services](/docs/PubSubPlusOpenShiftDeployment.md#validating-the-deployment).
  
-> **Note**: There is no Load Balancer support with CodeReady Containers—services are accessed through NodePorts instead. Check the results of the `oc get svc my-release-pubsubplus` command. This command returns the ephemeral NodePort port numbers for each message router service. Use these port numbers together with CodeReady Containers' public IP address, which can be obtained by running the `crc ip` command.
+> **Note**: There is no Load Balancer support with CodeReady Containers. Services are accessed through NodePorts instead. Check the results of the `oc get svc my-release-pubsubplus` command. This command returns the ephemeral NodePort port numbers for each message router service. Use these port numbers together with CodeReady Containers' public IP addresses, which can be obtained by running the `crc ip` command.
 
-If you have any problems, refer to the [Troubleshooting](https://github.com/SolaceProducts/pubsubplus-kubernetes-quickstart/blob/master/docs/PubSubPlusK8SDeployment.md#troubleshooting) section of the general PubSub+ Kubernetes Documentation—substitute any `kubectl` commands with `oc` commands.
+If you have any problems, refer to the [Troubleshooting](https://github.com/SolaceProducts/pubsubplus-kubernetes-quickstart/blob/master/docs/PubSubPlusK8SDeployment.md#troubleshooting) section of the general PubSub+ Kubernetes Documentation for help. Substitute any `kubectl` commands with `oc` commands.
 
-If you need to start over, follow the [steps to delete the current deployment](/docs/PubSubPlusOpenShiftDeployment.md##delete-the-pubsub-deployment).
+If you need to start over, follow the steps to [delete the current deployment](/docs/PubSubPlusOpenShiftDeployment.md#deleting-a-deployment).
 
 
 ## Contributing
