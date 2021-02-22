@@ -100,6 +100,6 @@ jobs:
         shopt -s expand_aliases; alias remote_command=${REMOTE_COMMAND}
         # Only touch the remote VM if not used by someone else
         if [[ ${RUNCONFLICT} != true ]]; then
-          remote_command "/opt/scripts/shutdownCrc"
+          remote_command "/opt/scripts/shutdownCrc" || echo "Issues found with remote command"
           gcloud compute instances stop ${TESTGCPMACHINE} --project "capable-stream-180018" --zone "us-east4-a"
         fi
