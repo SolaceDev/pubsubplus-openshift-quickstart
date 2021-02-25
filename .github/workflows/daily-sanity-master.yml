@@ -1,4 +1,4 @@
-name: build
+name: daily-sanity-master
 
 # Controls when the action will run.
 on:
@@ -6,8 +6,8 @@ on:
 
   push:
 
-  #schedule:
-  #- cron: "0 2 * * *"
+  schedule:
+  - cron: "0 2 * * *"
 
 jobs:
   deploy:
@@ -16,6 +16,10 @@ jobs:
     timeout-minutes: 55
 
     steps:
+    - uses: actions/checkout@v2
+      with:
+        ref: master
+
     - name: Set env and tools
       run: |
         echo "TESTUSER=vagrant" >> $GITHUB_ENV # must exist
@@ -27,9 +31,6 @@ jobs:
         #
         sudo gem update --system 3.0.6
         sudo gem install yaml-lint
-
-    - name: Checkout
-      uses: actions/checkout@v2
 
     - name: Set up Cloud SDK
       uses: google-github-actions/setup-gcloud@master
