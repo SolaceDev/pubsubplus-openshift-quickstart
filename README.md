@@ -1,4 +1,4 @@
-[![Actions Status](https://github.com/SolaceProducts/pubsubplus-openshift-quickstart/workflows/build/badge.svg?branch=master)](https://github.com/SolaceProducts/pubsubplus-openshift-quickstart/actions?query=workflow%3Abuild+branch%3Amaster)
+[![Actions Status](https://github.com/SolaceDev/pubsubplus-openshift-quickstart/workflows/daily-sanity-master/badge.svg?event=schedule)](https://github.com/SolaceDev/pubsubplus-openshift-quickstart/actions?query=workflow%3Adaily-sanity-master)
 
 
 # Deploying a Solace PubSub+ Software Event Broker onto an OpenShift 4 Platform
