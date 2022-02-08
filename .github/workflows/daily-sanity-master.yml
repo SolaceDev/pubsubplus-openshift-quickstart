@@ -66,22 +66,12 @@ jobs:
       run: |
         shopt -s expand_aliases; alias remote_command=${REMOTE_COMMAND}
         remote_command "/opt/scripts/helmInstallBroker helmtest"
-        remote_command "/opt/scripts/testBroker helmtest my-release-pubsubplus-dev" | tee out.txt
+        remote_command "/opt/scripts/testBroker helmtest my-release-pubsubplus-openshift-dev" | tee out.txt
         grep "aurelia" out.txt # web portal access
         grep "<redundancy-status>Up</redundancy-status>" out.txt
         grep "<oper-status>Up</oper-status>" out.txt
         grep 100000 out.txt # smf messaging
         remote_command "/opt/scripts/helmDeleteBroker helmtest"
-        rm -f out.txt
-
-    - name: Deploy non-HA broker and test, using template install
-      run: |
-        shopt -s expand_aliases; alias remote_command=${REMOTE_COMMAND}
-        remote_command "/opt/scripts/templateInstallBroker templatenonha /opt/templates/eventbroker_singlenode_template.yaml"
-        remote_command "/opt/scripts/testBroker templatenonha my-release-pubsubplus" | tee out.txt
-        grep "aurelia" out.txt # web portal access
-        grep 100000 out.txt # smf messaging
-        remote_command "/opt/scripts/templateDeleteBroker templatenonha /opt/templates/eventbroker_singlenode_template.yaml"
         rm -f out.txt
 
     - name: Deploy HA broker and test, using template install
@@ -94,6 +84,16 @@ jobs:
         grep "<oper-status>Up</oper-status>" out.txt
         grep 100000 out.txt # smf messaging
         remote_command "/opt/scripts/templateDeleteBroker templateha /opt/templates/eventbroker_ha_template.yaml"
+
+    - name: Deploy non-HA broker and test, using template install
+      run: |
+        shopt -s expand_aliases; alias remote_command=${REMOTE_COMMAND}
+        remote_command "/opt/scripts/templateInstallBroker templatenonha /opt/templates/eventbroker_singlenode_template.yaml"
+        remote_command "/opt/scripts/testBroker templatenonha my-release-pubsubplus" | tee out.txt
+        grep "aurelia" out.txt # web portal access
+        grep 100000 out.txt # smf messaging
+        remote_command "/opt/scripts/templateDeleteBroker templatenonha /opt/templates/eventbroker_singlenode_template.yaml"
+        rm -f out.txt
 
     - name: Cleanup
       if: ${{ always() }}
