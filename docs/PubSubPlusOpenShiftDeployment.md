@@ -30,9 +30,9 @@ Contents:
 ## Production Deployment Architecture
 
 The following diagram shows an example of an HA group deployment of PubSub+ software event brokers in AWS:
+
 ![alt text](/docs/images/network_diagram.jpg "Network Diagram")
 
-<br/>
 The key parts to note in the diagram above are:
 - the three PubSub+ Container instances in OpenShift pods, deployed on OpenShift (worker) nodes
 - the cloud load balancer exposing the event broker's services and management interface
@@ -131,9 +131,12 @@ By default, the deployment scripts pull the Solace PubSub+ image from the [Red H
 However, if you need to use a private image registry, such as AWS ECR, you must supply a pull secret to enable access to the registry. The steps that follow show how to use AWS ECR for the broker image.
 
 1. Download a free trial of the the Solace PubSub+ Enterprise Evaluation Edition by going to the **Docker** section of the [Solace Downloads](https://solace.com/downloads/?fwp_downloads_types=pubsub-enterprise-evaluation) page, or obtain an image from Solace Support.
-2. Push the broker image to the private registry. Follow the specific procedures for the registry you are using. For ECR, see [Using Amazon ECR with the AWS CLI](https://docs.aws.amazon.com/AmazonECR/latest/userguide/getting-started-cli.html).
-    >Note: If you are advised to run `aws ecr get-login-password` as part of the "Authenticate to your registry" step and it fails, try running `$(aws ecr get-login --region <your-registry-region> --no-include-email)` instead.
-    ![alt text](/docs/images/ECR-Registry.png "ECR Registry")
+2. Push the broker image to the private registry. Follow the specific procedures for the registry you are using. For ECR, see the diagram below as well as the instructions in [Using Amazon ECR with the AWS CLI](https://docs.aws.amazon.com/AmazonECR/latest/userguide/getting-started-cli.html).
+![alt text](/docs/images/ECR-Registry.png "ECR Registry")
+    >Note: If you are advised to run `aws ecr get-login-password` as part of the "Authenticate to your registry" step and it fails, try running `$(aws ecr get-login --region <your-registry-region> --no-include-email)` instead. 
+    
+    
+
 3. Create a pull secret from the registry information in the Docker configuration. This assumes that the ECR login happened on the same machine:
     ```
     oc create secret generic <my-pullsecret> \
