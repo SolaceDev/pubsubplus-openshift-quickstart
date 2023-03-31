@@ -106,7 +106,7 @@ oc new-project solace-pubsubplus
 
 From here follow the steps in the [Solace PubSub+ Event Broker Operator Quick Start Guide](https://github.com/SolaceDev/pubsubplus-kubernetes-operator#3-install-the-solace-pubsub-software-event-broker-with-default-configuration) to deploy a single-node or an HA event broker.
 
->Note: the Operator recognizes the OpenShift environment and adjusts the default parameters for the broker specification, including the use of certified RedHat images. For more information, refer to the [detailed documentation](docs/PubSubPlusOpenShiftDeployment.md#broker-spec-defaults-in-openshift) in this repo.
+>Note: the Operator recognizes the OpenShift environment and adjusts the default deployment `spec` parameters for the event broker, including the use of certified RedHat images. For more information, refer to the [detailed documentation](docs/PubSubPlusOpenShiftDeployment.md#broker-spec-defaults-in-openshift) in this repo.
 
 ## Contributing
 
