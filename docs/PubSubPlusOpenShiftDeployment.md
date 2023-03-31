@@ -131,11 +131,10 @@ By default, the deployment scripts pull the Solace PubSub+ image from the [Red H
 However, if you need to use a private image registry, such as AWS ECR, you must supply a pull secret to enable access to the registry. The steps that follow show how to use AWS ECR for the broker image.
 
 1. Download a free trial of the the Solace PubSub+ Enterprise Evaluation Edition by going to the **Docker** section of the [Solace Downloads](https://solace.com/downloads/?fwp_downloads_types=pubsub-enterprise-evaluation) page, or obtain an image from Solace Support.
-2. Push the broker image to the private registry. Follow the specific procedures for the registry you are using. For ECR, see the diagram below as well as the instructions in [Using Amazon ECR with the AWS CLI](https://docs.aws.amazon.com/AmazonECR/latest/userguide/getting-started-cli.html).
-![alt text](/docs/images/ECR-Registry.png "ECR Registry")
+2. Push the broker image to the private registry. Follow the specific procedures for the registry you are using. For ECR, see the diagram below as well as the instructions in [Using Amazon ECR with the AWS CLI](https://docs.aws.amazon.com/AmazonECR/latest/userguide/getting-started-cli.html).<br /><br />
+    ![alt text](/docs/images/ECR-Registry.png "ECR Registry")<br />
+<br />
     >Note: If you are advised to run `aws ecr get-login-password` as part of the "Authenticate to your registry" step and it fails, try running `$(aws ecr get-login --region <your-registry-region> --no-include-email)` instead. 
-    
-    
 
 3. Create a pull secret from the registry information in the Docker configuration. This assumes that the ECR login happened on the same machine:
     ```
@@ -174,9 +173,9 @@ The Operator detects (1) whether the OpenShift platform is used and (2) the name
 
 | OpenShift Project (Namespace) | Broker Spec Parameter | General Kubernetes Defaults (for information only) | OpenShift Defaults |
 | --- | --- | --- | --- |
-| Any, excluding `default`—Note: We recommend that you do NOT use the `default` project | `spec.securityContext.runAsUser` | 1000001| Not set (OpenShift sets it according to the OpenShift project settings) |
+| Any, excluding `default`. <br /><br />**Note:** We recommend that you do NOT use the `default` project. | `spec.securityContext.runAsUser` | 1000001| Not set (OpenShift sets it according to the OpenShift project settings) |
 || `spec.securityContext.fsGroup` | 1000002 | Not set (OpenShift sets it according to the OpenShift project settings) |
-| `default`—Note: Not recommended | `spec.securityContext.runAsUser` | 1000001 | 1000001 |
+| `default` <br /><br />**Note:** Not recommended | `spec.securityContext.runAsUser` | 1000001 | 1000001 |
 || `spec.securityContext.fsGroup` | 1000002 | 1000002 |
 | All OpenShift projects | `spec.image` | solace/solace-pubsub-standard | registry.connect.redhat.com/solace/pubsubplus-standard |
 | | `spec.monitoring.image` | solace/solace-prometheus-exporter | registry.connect.redhat.com/solace/pubsubplus-prometheus-exporter |
@@ -275,6 +274,7 @@ Monitoring must be enabled for user-defined projects by [creating a `user-worklo
 After this, the only step required to [connect the broker metrics with Prometheus](https://github.com/SolaceDev/pubsubplus-kubernetes-operator/blob/v1.0.0/docs/EventBrokerOperatorUserGuide.md#connecting-with-prometheus) is to [create a ServiceMonitor object](https://github.com/SolaceDev/pubsubplus-kubernetes-operator/blob/v1.0.0/docs/EventBrokerOperatorUserGuide.md#creating-a-servicemonitor-object) in the project where the broker has been deployed.
 
 Check the OpenShift admin console in "Administrator" view to verify that the monitoring endpoint for the event broker deployment has been connected to Prometheus:
+
 ![alt text](/docs/images/PrometheusTargets.png "Prometheus targets")
 
 To enable custom Dashboards in the Grafana UI, you must install the community Grafana Operator from OpenShift's OperatorHub and then connect it to OpenShift Prometheus via a GrafanaDataSource.
