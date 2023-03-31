@@ -12,7 +12,7 @@ Contents:
 - [Deploying a Solace PubSub+ Software Event Broker using Operator onto an OpenShift 4 Platform](#deploying-a-solace-pubsub-software-event-broker-using-operator-onto-an-openshift-4-platform)
   - [Description of the Solace PubSub+ Software Event Broker](#solace-pubsub-software-event-broker)
   - [Overview](#overview)
-  - [Step 1: Access to OpenShift Platform](#step-1-access-to-openshift-platform)
+  - [Step 1: Set Up OpenShift](#step-1-set-up-openshift)
   - [Step 2: Install the PubSub+ Event Broker Operator](#step-2-install-the-pubsub-event-broker-operator)
   - [Step 3: Deploy the PubSub+ Software Event Broker](#step-3-deploy-the-pubsub-software-event-broker)
   - [Contributing](#contributing)
@@ -32,11 +32,11 @@ This document provides a quick getting started guide to install the broker in va
 
 For additional documentation, see [/docs/PubSubPlusOpenShiftDeployment.md](/docs/PubSubPlusOpenShiftDeployment.md) in this repo.
 
-## Step 1: Access to OpenShift Platform
+## Step 1: Set Up OpenShift
 
-There are [multiple ways](https://www.openshift.com/try ) to set up an OpenShift 4 platform, including following examples:
-- The detailed [Event Broker on OpenShift](/docs/PubSubPlusOpenShiftDeployment.md#deploy-a-production-ready-openshift-container-platform-onto-aws) documentation describes how to set up a production-ready Red Hat OpenShift Container Platform platform on AWS.
-- An option for developers is to locally deploy an all-in-one environment using [CodeReady Containers](https://developers.redhat.com/products/codeready-containers/overview). However, note that this requires sufficient local resources (minimum 2 CPUs and 4GB memory) additional to CodeReady resource requirements.
+There are [multiple ways](https://www.openshift.com/try ) to set up an OpenShift 4 deployment, including the following examples:
+- The detailed [Event Broker on OpenShift](/docs/PubSubPlusOpenShiftDeployment.md#deploy-a-production-ready-openshift-container-platform-onto-aws) documentation describes how to set up a production-ready Red Hat OpenShift Container Platform deployment on AWS.
+- An option for developers is to locally deploy an all-in-one environment using [CodeReady Containers](https://developers.redhat.com/products/codeready-containers/overview). However, note that this requires sufficient local resources (minimum 2 CPUs and 4GB memory) in addition to the CodeReady resource requirements.
 
 ## Step 2: Install the PubSub+ Event Broker Operator
 
