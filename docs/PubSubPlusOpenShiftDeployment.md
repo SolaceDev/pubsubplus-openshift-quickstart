@@ -133,7 +133,6 @@ However, if you need to use a private image registry, such as AWS ECR, you must 
 1. Download a free trial of the the Solace PubSub+ Enterprise Evaluation Edition by going to the **Docker** section of the [Solace Downloads](https://solace.com/downloads/?fwp_downloads_types=pubsub-enterprise-evaluation) page, or obtain an image from Solace Support.
 2. Push the broker image to the private registry. Follow the specific procedures for the registry you are using. For ECR, see the diagram below as well as the instructions in [Using Amazon ECR with the AWS CLI](https://docs.aws.amazon.com/AmazonECR/latest/userguide/getting-started-cli.html).<br /><br />
     ![alt text](/docs/images/ECR-Registry.png "ECR Registry")<br />
-<br />
     >Note: If you are advised to run `aws ecr get-login-password` as part of the "Authenticate to your registry" step and it fails, try running `$(aws ecr get-login --region <your-registry-region> --no-include-email)` instead. 
 
 3. Create a pull secret from the registry information in the Docker configuration. This assumes that the ECR login happened on the same machine:
